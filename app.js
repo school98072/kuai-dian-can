@@ -58,17 +58,29 @@ const state = {
 /* ============================================================
    IMAGE HOSTING (imgbb)
    ============================================================ */
+function base64ToBlob(base64Data) {
+  const [header, data] = base64Data.split(',');
+  const mime = header.match(/:(.*?);/)[1];
+  const binary = atob(data);
+  const arr = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
 async function uploadToImgbb(base64Data) {
   if (!CONFIG.imgbb.apiKey) { console.warn('[imgbb] no API key'); return null; }
   try {
-    const base64 = base64Data.split(',')[1];
+    const blob = base64ToBlob(base64Data);
     const form = new FormData();
-    form.append('key', CONFIG.imgbb.apiKey);
-    form.append('image', base64);
-    console.log('[imgbb] uploading...');
-    const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
+    form.append('image', blob, 'dish.jpg');
+    console.log('[imgbb] uploading, blob size:', blob.size);
+    // Key must be in URL query param
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${CONFIG.imgbb.apiKey}`, {
+      method: 'POST',
+      body: form,
+    });
     const json = await res.json();
-    console.log('[imgbb] response:', JSON.stringify(json).substring(0, 200));
+    console.log('[imgbb] response:', JSON.stringify(json).substring(0, 300));
     return json.success ? json.data.display_url : null;
   } catch (err) {
     console.error('[imgbb] upload error:', err);
