@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="100%" style="stop-color:#E85D04"/>
+    </linearGradient>
+  </defs>
+  <!-- Full bleed background for maskable -->
+  <rect width="192" height="192" fill="url(#bg2)"/>
+  <!-- Safe zone content (center 80%) -->
+  <ellipse cx="96" cy="122" rx="50" ry="20" fill="white" opacity="0.95"/>
+  <path d="M46 122 Q96 78 146 122 Z" fill="white" opacity="0.95"/>
+  <path d="M70 65 Q74 55 70 44" stroke="white" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.85"/>
+  <path d="M96 63 Q100 53 96 42" stroke="white" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.85"/>
+  <path d="M122 65 Q126 55 122 44" stroke="white" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.85"/>
+</svg>

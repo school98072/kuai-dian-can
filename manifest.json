@@ -1,0 +1,27 @@
+{
+  "name": "快點餐 - 點餐系統",
+  "short_name": "快點餐",
+  "description": "輕鬆點餐，快速下單，好吃不等待",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F7F0EB",
+  "theme_color": "#FF6B35",
+  "lang": "zh-TW",
+  "categories": ["food", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
