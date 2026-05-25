@@ -17,6 +17,12 @@ const CONFIG = {
     customItems: 'pwa_ordersys_custom_v1',
     cart: 'pwa_ordersys_cart_v1',
   },
+
+  // 免費申請 API Key：https://api.imgbb.com
+  // 填入後，自定義菜品圖片會自動上傳並在郵件中可直接查看
+  imgbb: {
+    apiKey: '',
+  },
 };
 
 /* ============================================================
@@ -45,7 +51,26 @@ const state = {
   cart: [],       // { id, item, quantity, notes }
   editingCartId: null,  // cart entry ID currently being note-edited
   pendingCustomImage: null,
+  pendingCustomImageUrl: null, // imgbb hosted URL (set after upload)
 };
+
+/* ============================================================
+   IMAGE HOSTING (imgbb)
+   ============================================================ */
+async function uploadToImgbb(base64Data) {
+  if (!CONFIG.imgbb.apiKey) return null;
+  try {
+    const base64 = base64Data.split(',')[1];
+    const form = new FormData();
+    form.append('key', CONFIG.imgbb.apiKey);
+    form.append('image', base64);
+    const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
+    const json = await res.json();
+    return json.success ? json.data.display_url : null;
+  } catch {
+    return null;
+  }
+}
 
 /* ============================================================
    HELPERS
@@ -330,6 +355,7 @@ function openCustomModal() {
   $('imgInput').value = '';
   $('uploadZone').classList.remove('dragover');
   state.pendingCustomImage = null;
+  state.pendingCustomImageUrl = null;
 
   $('customModal').classList.add('open');
   $('overlay').classList.add('active');
@@ -364,6 +390,11 @@ function handleImageSelect(file) {
       $('imgPreview').src = state.pendingCustomImage;
       $('imgPreview').hidden = false;
       $('uploadHint').hidden = true;
+      // Upload to imgbb in background for email display
+      state.pendingCustomImageUrl = null;
+      uploadToImgbb(state.pendingCustomImage).then(url => {
+        state.pendingCustomImageUrl = url;
+      });
     };
     img.src = evt.target.result;
   };
@@ -394,6 +425,7 @@ function addCustomItem() {
     from: g[0],
     to: g[1],
     imageData: state.pendingCustomImage || null,
+    imageUrl: state.pendingCustomImageUrl || null,
     isCustom: true,
   };
 
@@ -488,6 +520,7 @@ async function placeOrder() {
   const lines = state.cart.map(e => {
     let line = `• ${e.item.name} × ${e.quantity}`;
     if (e.notes) line += `（備註：${e.notes}）`;
+    if (e.item.imageUrl) line += `\n  📷 圖片：${e.item.imageUrl}`;
     return line;
   });
 
