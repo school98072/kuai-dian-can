@@ -59,16 +59,19 @@ const state = {
    IMAGE HOSTING (imgbb)
    ============================================================ */
 async function uploadToImgbb(base64Data) {
-  if (!CONFIG.imgbb.apiKey) return null;
+  if (!CONFIG.imgbb.apiKey) { console.warn('[imgbb] no API key'); return null; }
   try {
     const base64 = base64Data.split(',')[1];
     const form = new FormData();
     form.append('key', CONFIG.imgbb.apiKey);
     form.append('image', base64);
+    console.log('[imgbb] uploading...');
     const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
     const json = await res.json();
+    console.log('[imgbb] response:', JSON.stringify(json).substring(0, 200));
     return json.success ? json.data.display_url : null;
-  } catch {
+  } catch (err) {
+    console.error('[imgbb] upload error:', err);
     return null;
   }
 }
@@ -528,6 +531,8 @@ async function placeOrder() {
   });
 
   const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  console.log('[order] cart imageUrls:', state.cart.map(e => ({ name: e.item.name, imageUrl: e.item.imageUrl })));
 
   const htmlLines = state.cart.map(e => {
     let html = `<p style="margin:6px 0">• <strong>${esc(e.item.name)}</strong> × ${e.quantity}`;
