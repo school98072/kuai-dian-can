@@ -532,7 +532,22 @@ async function placeOrder() {
 
   const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  console.log('[order] cart imageUrls:', state.cart.map(e => ({ name: e.item.name, imageUrl: e.item.imageUrl })));
+  // For items that have imageData but no imageUrl (e.g. added before imgbb upload completed),
+  // upload now so the email can include the image.
+  await Promise.all(state.cart.map(async e => {
+    if (e.item.imageData && !e.item.imageUrl) {
+      console.log('[order] uploading missing imageUrl for:', e.item.name);
+      const url = await uploadToImgbb(e.item.imageData);
+      if (url) {
+        e.item.imageUrl = url;
+        // Persist back to allItems so localStorage stays in sync
+        const stored = state.allItems.find(i => i.id === e.item.id);
+        if (stored) stored.imageUrl = url;
+        saveCustomItems();
+      }
+      console.log('[order] imageUrl result:', e.item.name, url);
+    }
+  }));
 
   const htmlLines = state.cart.map(e => {
     let html = `<p style="margin:6px 0">• <strong>${esc(e.item.name)}</strong> × ${e.quantity}`;
