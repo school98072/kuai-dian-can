@@ -7,10 +7,10 @@ const CONFIG = {
   chefEmail: 'school98072@gmail.com',
 
   emailjs: {
-    enabled: false,            // Set to true after completing EmailJS setup
-    publicKey: 'YOUR_PUBLIC_KEY',
-    serviceId: 'YOUR_SERVICE_ID',
-    templateId: 'YOUR_TEMPLATE_ID',
+    enabled: true,
+    publicKey: 'ASAdQQZsxJaXT41zK',
+    serviceId: 'service_5trpflb',
+    templateId: 'template_5mouirh',
   },
 
   storage: {
