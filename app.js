@@ -21,7 +21,7 @@ const CONFIG = {
   // 免費申請 API Key：https://api.imgbb.com
   // 填入後，自定義菜品圖片會自動上傳並在郵件中可直接查看
   imgbb: {
-    apiKey: '',
+    apiKey: 'f5075433be019a339b4895b983fb193c',
   },
 };
 
@@ -517,21 +517,24 @@ async function placeOrder() {
     hour12: false,
   });
 
-  const lines = state.cart.map(e => {
-    let line = `• ${e.item.name} × ${e.quantity}`;
-    if (e.notes) line += `（備註：${e.notes}）`;
-    if (e.item.imageUrl) line += `\n  📷 圖片：${e.item.imageUrl}`;
-    return line;
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const htmlLines = state.cart.map(e => {
+    let html = `<p style="margin:6px 0">• <strong>${esc(e.item.name)}</strong> × ${e.quantity}`;
+    if (e.notes) html += `（備註：${esc(e.notes)}）`;
+    html += '</p>';
+    if (e.item.imageUrl) {
+      html += `<p style="margin:4px 0 12px 0"><img src="${e.item.imageUrl}" alt="${esc(e.item.name)}" style="max-width:200px;border-radius:8px;display:block"></p>`;
+    }
+    return html;
   });
 
-  const orderBody = [
-    `【訂單時間】${timestamp}`,
-    '',
-    '【點餐內容】',
-    ...lines,
-    '',
-    `共 ${cartTotal()} 道菜`,
-  ].join('\n');
+  const orderBody = `
+<p><strong>【訂單時間】</strong>${esc(timestamp)}</p>
+<p><strong>【點餐內容】</strong></p>
+${htmlLines.join('')}
+<p>共 ${cartTotal()} 道菜</p>
+`.trim();
 
   try {
     if (CONFIG.emailjs.enabled) {
