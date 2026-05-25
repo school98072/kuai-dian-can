@@ -51,7 +51,8 @@ const state = {
   cart: [],       // { id, item, quantity, notes }
   editingCartId: null,  // cart entry ID currently being note-edited
   pendingCustomImage: null,
-  pendingCustomImageUrl: null, // imgbb hosted URL (set after upload)
+  pendingCustomImageUrl: null,   // imgbb hosted URL once resolved
+  pendingCustomImageUpload: null, // Promise<string|null> while uploading
 };
 
 /* ============================================================
@@ -356,6 +357,7 @@ function openCustomModal() {
   $('uploadZone').classList.remove('dragover');
   state.pendingCustomImage = null;
   state.pendingCustomImageUrl = null;
+  state.pendingCustomImageUpload = null;
 
   $('customModal').classList.add('open');
   $('overlay').classList.add('active');
@@ -390,10 +392,12 @@ function handleImageSelect(file) {
       $('imgPreview').src = state.pendingCustomImage;
       $('imgPreview').hidden = false;
       $('uploadHint').hidden = true;
-      // Upload to imgbb in background for email display
+      // Start imgbb upload; store Promise so addCustomItem can await it
       state.pendingCustomImageUrl = null;
-      uploadToImgbb(state.pendingCustomImage).then(url => {
+      state.pendingCustomImageUpload = uploadToImgbb(state.pendingCustomImage).then(url => {
         state.pendingCustomImageUrl = url;
+        console.log('[imgbb] upload result:', url);
+        return url;
       });
     };
     img.src = evt.target.result;
@@ -401,12 +405,18 @@ function handleImageSelect(file) {
   reader.readAsDataURL(file);
 }
 
-function addCustomItem() {
+async function addCustomItem() {
   const name = $('customName').value.trim();
   if (!name) {
     showToast('請輸入菜品名稱', 'error');
     $('customName').focus();
     return;
+  }
+
+  // If imgbb upload is still running, wait for it (Promise resolves with URL or null)
+  if (state.pendingCustomImageUpload) {
+    showToast('圖片上傳中，請稍候…', 'info');
+    await state.pendingCustomImageUpload;
   }
 
   const CUSTOM_GRADIENTS = [
