@@ -1,221 +1,210 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>快點餐</title>
-
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#FF6B35">
+  <meta name="theme-color" content="#C8973E">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="快點餐">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-
-  <meta name="description" content="輕鬆點餐，快速下單，好吃不等待">
+  <meta name="description" content="私房菜点餐系统，好吃不等待">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ===== HEADER ===== -->
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="brand">
-        <div class="brand-icon-wrap">
-          <img src="icons/icon.svg" alt="" class="brand-icon" aria-hidden="true">
+  <div class="app" id="app">
+
+    <!-- ===== HEADER ===== -->
+    <header class="app-header">
+      <div class="header-banner" id="headerBanner">
+        <label class="banner-edit-btn" id="bannerEditBtn" title="更换封面" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          更换封面
+          <input type="file" id="bannerInput" accept="image/*" style="display:none">
+        </label>
+      </div>
+      <div class="shop-card">
+        <div class="shop-top">
+          <div class="shop-logo-wrap">
+            <img src="icons/icon.svg" alt="快點餐" class="shop-logo">
+          </div>
+          <div class="shop-meta">
+            <h1 class="shop-name">快點餐</h1>
+            <p class="shop-desc">幸福就是大口吃饭</p>
+          </div>
+          <button class="cart-header-btn" id="cartBtn" aria-label="查看购物车">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span class="cart-header-badge" id="cartHeaderBadge" hidden>0</span>
+          </button>
         </div>
-        <div class="brand-text">
-          <h1 class="brand-name">快點餐</h1>
-          <p class="brand-sub">好吃不等待</p>
+        <div class="shop-actions">
+          <button class="shop-action-btn" id="adminToggleBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            管理
+          </button>
+          <button class="shop-action-btn primary" id="openCustomBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            添加菜品
+          </button>
+          <button class="shop-action-btn" id="searchToggleBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            搜索
+          </button>
         </div>
       </div>
-      <button class="cart-header-btn" id="cartBtn" aria-label="開啟購物車">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="21" r="1"/>
-          <circle cx="20" cy="21" r="1"/>
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-        </svg>
-        <span class="cart-header-badge" id="cartHeaderBadge" hidden>0</span>
+    </header>
+
+    <!-- ===== SEARCH BAR ===== -->
+    <div class="search-bar" id="searchBar" hidden>
+      <div class="search-inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="searchInput" class="search-input" placeholder="搜索菜品名称...">
+        <button class="search-clear" id="searchClear" aria-label="清除搜索">✕</button>
+      </div>
+    </div>
+
+    <!-- ===== CONTENT AREA ===== -->
+    <div class="content-area">
+      <nav class="cat-sidebar" id="catSidebar" aria-label="菜品分类"></nav>
+      <main class="dish-main" id="dishMain" aria-label="菜单列表"></main>
+    </div>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <nav class="bottom-nav" aria-label="主导航">
+      <button class="nav-btn active" data-page="kitchen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        <span>厨房</span>
       </button>
-    </div>
-  </header>
-
-  <!-- ===== MAIN ===== -->
-  <main class="main-content">
-
-    <!-- Section bar -->
-    <div class="section-bar">
-      <h2 class="section-title">今日菜單</h2>
-      <button class="btn-custom-open" id="openCustomBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        自定義菜品
+      <button class="nav-btn" data-page="order" id="navOrderBtn">
+        <div class="nav-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="nav-badge" id="navBadge" hidden>0</span>
+        </div>
+        <span>订单</span>
       </button>
-    </div>
+      <button class="nav-btn" data-page="discover">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <span>发现</span>
+      </button>
+      <button class="nav-btn" data-page="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>我的</span>
+      </button>
+    </nav>
 
-    <!-- Menu Grid -->
-    <div class="menu-grid" id="menuGrid">
-      <!-- Cards rendered by JS -->
-    </div>
+  </div>
 
-  </main>
-
-  <!-- ===== FLOATING CART BUTTON ===== -->
-  <button class="cart-fab" id="cartFab" hidden aria-label="查看購物車">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="9" cy="21" r="1"/>
-      <circle cx="20" cy="21" r="1"/>
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-    </svg>
-    <span class="fab-badge" id="fabBadge">0</span>
-  </button>
-
-  <!-- ===== SHARED OVERLAY ===== -->
+  <!-- ===== OVERLAY ===== -->
   <div class="overlay" id="overlay"></div>
 
   <!-- ===== CART DRAWER ===== -->
-  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true" role="dialog" aria-label="購物車">
+  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true" role="dialog" aria-label="购物车">
     <div class="drawer-pill" id="drawerPill"></div>
     <div class="drawer-header">
       <h3 class="drawer-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-          <circle cx="9" cy="21" r="1"/>
-          <circle cx="20" cy="21" r="1"/>
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-        </svg>
-        我的訂單
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        我的订单
       </h3>
-      <button class="drawer-close-btn" id="closeDrawerBtn" aria-label="關閉購物車">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="20" height="20">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+      <button class="drawer-close-btn" id="closeDrawerBtn" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-
-    <div class="drawer-body" id="drawerBody">
-      <!-- Empty state or cart items rendered by JS -->
-    </div>
-
+    <div class="drawer-body" id="drawerBody"></div>
     <div class="drawer-footer" id="drawerFooter" hidden>
-      <div class="order-meta">
-        共 <strong id="totalCount">0</strong> 道菜品
-      </div>
+      <div class="order-meta">共 <strong id="totalCount">0</strong> 道菜</div>
       <button class="btn-place-order" id="placeOrderBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-        立即下單
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        立即下单
       </button>
     </div>
   </aside>
 
   <!-- ===== CUSTOM DISH MODAL ===== -->
-  <div class="modal" id="customModal" aria-hidden="true" role="dialog" aria-label="新增自定義菜品">
+  <div class="modal" id="customModal" aria-hidden="true" role="dialog" aria-label="添加自定义菜品">
     <div class="modal-header">
-      <h3 class="modal-title">自定義菜品</h3>
-      <button class="modal-close-btn" id="closeCustomBtn" aria-label="關閉">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="20" height="20">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+      <h3 class="modal-title">自定义菜品</h3>
+      <button class="modal-close-btn" id="closeCustomBtn" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <!-- Image upload -->
-      <label class="upload-zone" id="uploadZone" for="imgInput" aria-label="上傳菜品圖片">
+      <label class="upload-zone" id="uploadZone" for="imgInput" aria-label="上传菜品图片">
         <input type="file" id="imgInput" accept="image/*" class="visually-hidden" tabindex="-1">
-        <img id="imgPreview" class="img-preview" hidden alt="預覽圖片">
+        <img id="imgPreview" class="img-preview" hidden alt="预览图片">
         <div class="upload-hint" id="uploadHint">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="36" height="36" opacity="0.4">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-          <p>點擊上傳圖片</p>
-          <p class="upload-sub">支援 JPG、PNG（選填）</p>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" opacity="0.35"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <p>点击上传图片</p>
+          <p class="upload-sub">JPG、PNG（选填）</p>
         </div>
       </label>
-
       <div class="field-group">
-        <label class="field-label" for="customName">
-          菜品名稱 <span class="required-mark">*</span>
-        </label>
-        <input
-          type="text"
-          id="customName"
-          class="field-input"
-          placeholder="請輸入菜品名稱..."
-          maxlength="30"
-          autocomplete="off"
-        >
+        <label class="field-label" for="customName">菜品名称 <span class="required-mark">*</span></label>
+        <input type="text" id="customName" class="field-input" placeholder="请输入菜品名称..." maxlength="30" autocomplete="off">
       </div>
-
       <div class="field-group">
-        <label class="field-label" for="customNote">備註說明</label>
-        <textarea
-          id="customNote"
-          class="field-input field-textarea"
-          placeholder="例如：少辣、不加蔥、多點醬汁..."
-          rows="3"
-          maxlength="100"
-        ></textarea>
+        <label class="field-label" for="customDesc">简介（选填）</label>
+        <input type="text" id="customDesc" class="field-input" placeholder="例如：家常版、招牌..." maxlength="30" autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="customCategory">分类</label>
+        <select id="customCategory" class="field-input field-select">
+          <option value="dish">菜品</option>
+          <option value="soup">汤羹</option>
+          <option value="staple">主食</option>
+          <option value="snack">小吃</option>
+          <option value="baking">烘焙</option>
+          <option value="sauce">酱料</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="customNote">备注说明</label>
+        <textarea id="customNote" class="field-input field-textarea" placeholder="例如：少辣、不加葱..." rows="2" maxlength="100"></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-confirm" id="addCustomItemBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        加入點餐車
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        加入菜单
       </button>
     </div>
   </div>
 
-  <!-- ===== NOTE EDIT MODAL ===== -->
-  <div class="modal" id="noteModal" aria-hidden="true" role="dialog" aria-label="編輯備註">
+  <!-- ===== NOTE MODAL ===== -->
+  <div class="modal" id="noteModal" aria-hidden="true" role="dialog" aria-label="编辑备注">
     <div class="modal-header">
-      <h3 class="modal-title" id="noteModalTitle">加入備註</h3>
-      <button class="modal-close-btn" id="closeNoteBtn" aria-label="關閉">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="20" height="20">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+      <h3 class="modal-title" id="noteModalTitle">加入备注</h3>
+      <button class="modal-close-btn" id="closeNoteBtn" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
       <div class="field-group">
-        <label class="field-label" for="noteInput">備註說明（選填）</label>
-        <textarea
-          id="noteInput"
-          class="field-input field-textarea"
-          placeholder="例如：少辣、不加蔥、多點醬汁..."
-          rows="4"
-          maxlength="100"
-        ></textarea>
+        <label class="field-label" for="noteInput">备注说明（选填）</label>
+        <textarea id="noteInput" class="field-input field-textarea" placeholder="例如：少辣、不加葱、多点酱汁..." rows="4" maxlength="100"></textarea>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-confirm" id="confirmNoteBtn">確認儲存</button>
+      <button class="btn-confirm" id="confirmNoteBtn">确认保存</button>
     </div>
   </div>
 
-  <!-- ===== ORDER CONFIRM MODAL ===== -->
+  <!-- ===== CONFIRM MODAL ===== -->
   <div class="modal modal-sm" id="confirmModal" aria-hidden="true" role="dialog">
     <div class="modal-body confirm-body">
       <div class="confirm-icon">🚀</div>
-      <h3 class="confirm-title">確認下單？</h3>
-      <p class="confirm-sub" id="confirmSub">訂單將傳送給廚師</p>
+      <h3 class="confirm-title">确认下单？</h3>
+      <p class="confirm-sub" id="confirmSub">订单将传送给厨师</p>
     </div>
     <div class="modal-footer confirm-footer">
       <button class="btn-cancel" id="cancelOrderBtn">取消</button>
-      <button class="btn-confirm" id="confirmOrderBtn">確認下單</button>
+      <button class="btn-confirm" id="confirmOrderBtn">确认下单</button>
     </div>
   </div>
 
@@ -225,13 +214,13 @@
   <!-- ===== INSTALL PROMPT ===== -->
   <div class="install-bar" id="installBar" hidden>
     <div class="install-bar-inner">
-      <img src="icons/icon.svg" alt="" width="36" height="36" class="install-icon">
+      <img src="icons/icon.svg" alt="" width="32" height="32">
       <div class="install-text">
-        <strong>安裝快點餐</strong>
-        <span>新增到主畫面，隨時快速點餐</span>
+        <strong>安装快点餐</strong>
+        <span>添加到主画面，随时快速点餐</span>
       </div>
-      <button class="btn-install" id="installBtn">安裝</button>
-      <button class="btn-install-dismiss" id="installDismiss" aria-label="關閉">✕</button>
+      <button class="btn-install" id="installBtn">安装</button>
+      <button class="btn-install-dismiss" id="installDismiss" aria-label="关闭">✕</button>
     </div>
   </div>
 
