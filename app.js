@@ -196,7 +196,11 @@ async function pushMenuToGitHub() {
       version: 1,
       lastUpdated: new Date().toISOString(),
       bannerImage: state.bannerImage || null,
-      items: state.allItems.map(({ imageData, ...rest }) => rest), // strip dish base64
+      // Merge latest local base64 into each item before pushing
+      items: state.allItems.map(item => ({
+        ...item,
+        imageData: state.dishImages[item.id] || item.imageData || null,
+      })),
     };
     const result = await githubPutFile('menu.json', menuData, sha, 'update menu');
     if (result && result.content) {
@@ -712,13 +716,9 @@ function createDishCard(item) {
     reader.onload = ev => openCropModal(ev.target.result, cropped => {
       state.dishImages[item.id] = cropped;
       saveDishImages();
-      // Find & update imageUrl in allItems
+      // Store base64 directly in the item for GitHub sync (no imgbb needed)
       const mi = state.allItems.find(i => i.id === item.id);
-      if (mi) {
-        uploadToImgbb(cropped).then(url => {
-          if (url) { mi.imageUrl = url; state.dishImageUrls[item.id] = url; }
-        });
-      }
+      if (mi) mi.imageData = cropped;
       refreshDish(item.id);
       showToast('图片已更新，记得发布菜单', 'info');
     });
@@ -962,9 +962,7 @@ function handleImageSelect(file) {
     state.pendingCustomImage = cropped;
     $('imgPreview').src = cropped; $('imgPreview').hidden = false; $('uploadHint').hidden = true;
     state.pendingCustomImageUrl = null;
-    state.pendingCustomImageUpload = uploadToImgbb(cropped).then(url => {
-      state.pendingCustomImageUrl = url; return url;
-    });
+    state.pendingCustomImageUpload = null; // no imgbb pre-upload needed
   });
   reader.readAsDataURL(file);
 }
@@ -972,10 +970,7 @@ function handleImageSelect(file) {
 async function addCustomItem() {
   const name = $('customName').value.trim();
   if (!name) { showToast('请输入菜品名称', 'error'); $('customName').focus(); return; }
-  if (state.pendingCustomImageUpload) {
-    showToast('图片上传中，请稍候…', 'info');
-    await state.pendingCustomImageUpload;
-  }
+  // No imgbb pre-upload; base64 goes directly into item.imageData
   const GRADS = [['#6C5CE7','#A29BFE'],['#00CEC9','#81ECEC'],['#E84393','#E17055'],['#0984E3','#74B9FF'],['#00B894','#55EFC4']];
   const g     = GRADS[state.allItems.filter(i => i.isCustom).length % GRADS.length];
   const item  = {
