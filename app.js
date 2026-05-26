@@ -829,7 +829,7 @@ ${htmlLines.join('')}
         to_email: CONFIG.chefEmail, order_time: timestamp, order_content: orderBody,
       });
     } else {
-      const sub = encodeURIComponent(`【快点餐】新订单 - ${timestamp}`);
+      const sub = encodeURIComponent(`【小六仔之家】新订单 - ${timestamp}`);
       window.open(`mailto:${CONFIG.chefEmail}?subject=${sub}&body=${encodeURIComponent(orderBody)}`, '_blank');
     }
     clearCart();
@@ -904,7 +904,7 @@ function initInstallPrompt() {
     deferred.prompt();
     const { outcome } = await deferred.userChoice;
     deferred = null; $('installBar').hidden = true;
-    if (outcome === 'accepted') showToast('快点餐已安装 🎉', 'success');
+    if (outcome === 'accepted') showToast('小六仔之家幸福私厨已安装 🎉', 'success');
   });
   $('installDismiss').addEventListener('click', () => { $('installBar').hidden = true; });
   window.addEventListener('appinstalled', () => { $('installBar').hidden = true; });
