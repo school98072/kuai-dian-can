@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE_NAME = `pwa-ordersys-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   './',
@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   './icons/icon.png',
   './menu.json',
   './lists.json',
+  './orders.json',
 ];
 
 self.addEventListener('install', event => {

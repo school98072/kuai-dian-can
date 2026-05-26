@@ -54,25 +54,25 @@ const CATEGORIES = [
    FALLBACK MENU (used if GitHub fetch fails)
    ============================================================ */
 const FALLBACK_MENU = [
-  { id:'m01', name:'土豆烧鸡块', desc:'家常版，软糯入味',     category:'dish',   from:'#E8975A', to:'#C4621D', sales:38 },
-  { id:'m02', name:'番茄炒鸡蛋', desc:'经典家常，酸甜开胃',   category:'dish',   from:'#FF6B6B', to:'#EE9B00', sales:52 },
-  { id:'m03', name:'宫保鸡丁',   desc:'麻辣鲜香，下饭神器',   category:'dish',   from:'#E63946', to:'#F4A261', sales:45 },
-  { id:'m04', name:'鱼香肉丝',   desc:'四川家常，浓郁下饭',   category:'dish',   from:'#9B59B6', to:'#E63946', sales:29 },
-  { id:'m05', name:'红烧肉',     desc:'肥而不腻，软糯鲜香',   category:'dish',   from:'#7B2D00', to:'#C1440E', sales:61 },
-  { id:'m06', name:'清炒时蔬',   desc:'新鲜爽口，健康美味',   category:'dish',   from:'#52B788', to:'#1B4332', sales:24 },
-  { id:'s01', name:'番茄鸡蛋汤', desc:'鲜美营养，暖胃首选',   category:'soup',   from:'#FF6B6B', to:'#FFB347', sales:33 },
-  { id:'s02', name:'紫菜蛋花汤', desc:'清淡鲜美，营养丰富',   category:'soup',   from:'#7209B7', to:'#F72585', sales:18 },
-  { id:'s03', name:'冬瓜排骨汤', desc:'清甜解腻，滋补养生',   category:'soup',   from:'#4CC9F0', to:'#4361EE', sales:22 },
-  { id:'r01', name:'扬州炒饭',   desc:'粒粒分明，色香味俱全', category:'staple', from:'#F9C74F', to:'#F8961E', sales:47 },
-  { id:'r02', name:'葱油拌面',   desc:'简单美味，面条劲道',   category:'staple', from:'#A7795F', to:'#6B4226', sales:35 },
-  { id:'r03', name:'番茄鸡蛋面', desc:'酸甜开胃，暖心暖胃',   category:'staple', from:'#FF6B6B', to:'#F9C74F', sales:41 },
-  { id:'x01', name:'锅贴',       desc:'外酥里嫩，汁水丰盈',   category:'snack',  from:'#C19A6B', to:'#8B5E3C', sales:56 },
-  { id:'x02', name:'春卷',       desc:'金黄酥脆，馅料丰富',   category:'snack',  from:'#95D5B2', to:'#52B788', sales:31 },
-  { id:'x03', name:'香酥芝麻饼', desc:'香脆可口，芝麻飘香',   category:'snack',  from:'#DDA15E', to:'#BC6C25', sales:27 },
-  { id:'b01', name:'红豆吐司',   desc:'松软香甜，红豆馅料',   category:'baking', from:'#E63946', to:'#FFB347', sales:19 },
-  { id:'b02', name:'蛋黄酥',     desc:'层层酥皮，蛋黄流心',   category:'baking', from:'#F9C74F', to:'#F3722C', sales:43 },
-  { id:'c01', name:'自制辣椒酱', desc:'香辣开胃，配啥都好',   category:'sauce',  from:'#E63946', to:'#9D0208', sales:15 },
-  { id:'c02', name:'葱油酱',     desc:'鲜香浓郁，拌面一绝',   category:'sauce',  from:'#52B788', to:'#2D6A4F', sales:12 },
+  { id:'m01', name:'土豆烧鸡块', desc:'家常版，软糯入味',     category:'dish',   from:'#E8975A', to:'#C4621D', sales:0 },
+  { id:'m02', name:'番茄炒鸡蛋', desc:'经典家常，酸甜开胃',   category:'dish',   from:'#FF6B6B', to:'#EE9B00', sales:0 },
+  { id:'m03', name:'宫保鸡丁',   desc:'麻辣鲜香，下饭神器',   category:'dish',   from:'#E63946', to:'#F4A261', sales:0 },
+  { id:'m04', name:'鱼香肉丝',   desc:'四川家常，浓郁下饭',   category:'dish',   from:'#9B59B6', to:'#E63946', sales:0 },
+  { id:'m05', name:'红烧肉',     desc:'肥而不腻，软糯鲜香',   category:'dish',   from:'#7B2D00', to:'#C1440E', sales:0 },
+  { id:'m06', name:'清炒时蔬',   desc:'新鲜爽口，健康美味',   category:'dish',   from:'#52B788', to:'#1B4332', sales:0 },
+  { id:'s01', name:'番茄鸡蛋汤', desc:'鲜美营养，暖胃首选',   category:'soup',   from:'#FF6B6B', to:'#FFB347', sales:0 },
+  { id:'s02', name:'紫菜蛋花汤', desc:'清淡鲜美，营养丰富',   category:'soup',   from:'#7209B7', to:'#F72585', sales:0 },
+  { id:'s03', name:'冬瓜排骨汤', desc:'清甜解腻，滋补养生',   category:'soup',   from:'#4CC9F0', to:'#4361EE', sales:0 },
+  { id:'r01', name:'扬州炒饭',   desc:'粒粒分明，色香味俱全', category:'staple', from:'#F9C74F', to:'#F8961E', sales:0 },
+  { id:'r02', name:'葱油拌面',   desc:'简单美味，面条劲道',   category:'staple', from:'#A7795F', to:'#6B4226', sales:0 },
+  { id:'r03', name:'番茄鸡蛋面', desc:'酸甜开胃，暖心暖胃',   category:'staple', from:'#FF6B6B', to:'#F9C74F', sales:0 },
+  { id:'x01', name:'锅贴',       desc:'外酥里嫩，汁水丰盈',   category:'snack',  from:'#C19A6B', to:'#8B5E3C', sales:0 },
+  { id:'x02', name:'春卷',       desc:'金黄酥脆，馅料丰富',   category:'snack',  from:'#95D5B2', to:'#52B788', sales:0 },
+  { id:'x03', name:'香酥芝麻饼', desc:'香脆可口，芝麻飘香',   category:'snack',  from:'#DDA15E', to:'#BC6C25', sales:0 },
+  { id:'b01', name:'红豆吐司',   desc:'松软香甜，红豆馅料',   category:'baking', from:'#E63946', to:'#FFB347', sales:0 },
+  { id:'b02', name:'蛋黄酥',     desc:'层层酥皮，蛋黄流心',   category:'baking', from:'#F9C74F', to:'#F3722C', sales:0 },
+  { id:'c01', name:'自制辣椒酱', desc:'香辣开胃，配啥都好',   category:'sauce',  from:'#E63946', to:'#9D0208', sales:0 },
+  { id:'c02', name:'葱油酱',     desc:'鲜香浓郁，拌面一绝',   category:'sauce',  from:'#52B788', to:'#2D6A4F', sales:0 },
 ];
 
 /* ============================================================
@@ -93,7 +93,7 @@ const state = {
   activePage: 'kitchen',
   lists: { shoppingList: [], fridgeInventory: [] },
   activeListTab: 'shopping',
-  orderHistory: [],
+  orders: [],          // GitHub-synced order history
 };
 
 /* ============================================================
@@ -223,6 +223,63 @@ async function pushListsToGitHub() {
   }
 }
 
+async function fetchOrdersFromGitHub() {
+  try {
+    const url = `https://raw.githubusercontent.com/${GITHUB.owner}/${GITHUB.repo}/${GITHUB.branch}/orders.json?t=${Date.now()}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('network error');
+    const data = await r.json();
+    return Array.isArray(data.orders) ? data.orders : null;
+  } catch (e) {
+    console.warn('[GitHub] fetchOrders failed:', e);
+    return null;
+  }
+}
+
+async function pushOrderToGitHub(newOrder) {
+  try {
+    // Fetch latest orders from GitHub first (handles concurrent orders from 2 phones)
+    const remoteData = await fetchOrdersFromGitHub();
+    const merged = remoteData ? remoteData : state.orders.slice();
+    // Prepend new order (newest first)
+    merged.unshift(newOrder);
+    // Get SHA for PUT
+    const file = await githubGetFile('orders.json');
+    const sha  = file ? file.sha : undefined;
+    const ordersData = {
+      version: 1,
+      lastUpdated: new Date().toISOString(),
+      orders: merged,
+    };
+    const result = await githubPutFile('orders.json', ordersData, sha, 'add order');
+    if (result && result.content) {
+      state.orders = merged;
+      renderMenu(); // refresh 月销 counts
+      if (state.activePage === 'profile') renderProfilePage();
+      return true;
+    }
+    throw new Error(JSON.stringify(result));
+  } catch (e) {
+    console.error('[GitHub] pushOrder failed:', e);
+    showToast('订单记录同步失败，本地已保存', 'warning');
+    return false;
+  }
+}
+
+// 月销 — total units of itemId ordered in the current calendar month
+function getItemSales(itemId) {
+  const now = new Date();
+  const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  let total = 0;
+  state.orders.forEach(o => {
+    if (!o.timestamp || !o.timestamp.startsWith(yearMonth)) return;
+    (o.items || []).forEach(it => {
+      if (it.id === itemId) total += (it.quantity || 1);
+    });
+  });
+  return total;
+}
+
 /* ============================================================
    HELPERS
    ============================================================ */
@@ -273,11 +330,6 @@ function loadFromStorage() {
     if (banner) applyBannerImage(banner);
   } catch {}
 
-  // Order history
-  try {
-    const raw = localStorage.getItem(CONFIG.storage.history);
-    state.orderHistory = raw ? JSON.parse(raw) : [];
-  } catch { state.orderHistory = []; }
 }
 
 function saveCart() {
@@ -288,9 +340,6 @@ function saveDishImages() {
   localStorage.setItem(CONFIG.storage.dishImages, JSON.stringify(state.dishImages));
 }
 
-function saveOrderHistory() {
-  localStorage.setItem(CONFIG.storage.history, JSON.stringify(state.orderHistory));
-}
 
 /* ============================================================
    CROP MODAL
@@ -525,7 +574,7 @@ function createDishCard(item) {
       </div>
       ${item.desc ? `<p class="dish-desc">${escHtml(item.desc)}</p>` : ''}
       <div class="dish-footer">
-        <span class="dish-sales">月销 ${item.sales || 1}</span>
+        <span class="dish-sales">月销 ${getItemSales(item.id)}</span>
         <div class="dish-qty-ctrl">
           ${qty > 0 ? `<button class="qty-btn minus" data-id="${item.id}" aria-label="减少">−</button>
                        <span class="qty-num" aria-live="polite">${qty}</span>` : ''}
@@ -931,14 +980,13 @@ async function placeOrder() {
       const sub = encodeURIComponent(`【小六仔之家】新订单 - ${timestamp}`);
       window.open(`mailto:${CONFIG.chefEmail}?subject=${sub}&body=${encodeURIComponent(orderBody)}`, '_blank');
     }
-    // Save to history
+    // Save to GitHub (two-phone sync)
     const order = {
       id: uid(), timestamp: new Date().toISOString(),
       items: state.cart.map(c => ({ id: c.item.id, name: c.item.name, quantity: c.quantity })),
     };
-    state.orderHistory.unshift(order);
-    if (state.orderHistory.length > 50) state.orderHistory = state.orderHistory.slice(0, 50);
-    saveOrderHistory();
+    state.orders.unshift(order); // optimistic local update
+    pushOrderToGitHub(order);    // async GitHub push
 
     clearCart(); closeDrawer();
     showToast('🎉 下单成功！厨师已收到订单', 'success');
@@ -1048,7 +1096,7 @@ function renderListsPage() {
 function renderProfilePage() {
   const pg = $('profilePage');
   if (!pg || pg.hidden) return;
-  const history = state.orderHistory;
+  const history = state.orders;
 
   const buildCard = order => {
     const date = new Date(order.timestamp).toLocaleString('zh-TW', {
@@ -1076,7 +1124,7 @@ function renderProfilePage() {
     </div>`;
 
   pg.querySelectorAll('.reorder-btn').forEach(btn => btn.addEventListener('click', () => {
-    const order = state.orderHistory.find(o => o.id === btn.dataset.id);
+    const order = state.orders.find(o => o.id === btn.dataset.id);
     if (!order) return;
     order.items.forEach(hi => {
       const menuItem = state.allItems.find(i => i.id === hi.id);
@@ -1207,6 +1255,13 @@ async function loadRemoteData() {
     state.lists.shoppingList   = remoteLists.shoppingList   || [];
     state.lists.fridgeInventory= remoteLists.fridgeInventory|| [];
     if (state.activePage === 'lists') renderListsPage();
+  }
+  // Orders (GitHub-synced history)
+  const remoteOrders = await fetchOrdersFromGitHub();
+  if (remoteOrders) {
+    state.orders = remoteOrders;
+    renderMenu(); // refresh 月销 with real data
+    if (state.activePage === 'profile') renderProfilePage();
   }
 }
 
