@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-26T08:08:29.163Z",
+  "lastUpdated": "2026-05-26T08:16:02.206Z",
   "items": [
     {
       "id": "m02",
@@ -175,6 +175,18 @@
       "from": "#52B788",
       "to": "#2D6A4F",
       "sales": 0
+    },
+    {
+      "id": "custom-mpmd26eewc3e",
+      "name": "测试",
+      "desc": "测试测试",
+      "emoji": "🍽️",
+      "from": "#00CEC9",
+      "to": "#81ECEC",
+      "category": "dish",
+      "sales": 0,
+      "imageUrl": "https://i.ibb.co/MyxXXYcL/dish.jpg",
+      "isCustom": true
     }
   ]
 }
