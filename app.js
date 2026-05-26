@@ -94,6 +94,7 @@ const state = {
   lists: { shoppingList: [], fridgeInventory: [] },
   activeListTab: 'shopping',
   orders: [],          // GitHub-synced order history
+  bannerImage: null,   // GitHub-synced via menu.json
 };
 
 /* ============================================================
@@ -164,7 +165,8 @@ async function fetchMenuFromGitHub() {
     const r = await fetch(url);
     if (!r.ok) throw new Error('network error');
     const data = await r.json();
-    return Array.isArray(data.items) ? data.items : null;
+    if (!Array.isArray(data.items)) return null;
+    return { items: data.items, bannerImage: data.bannerImage || null };
   } catch (e) {
     console.warn('[GitHub] fetchMenu failed:', e);
     return null;
@@ -191,7 +193,8 @@ async function pushMenuToGitHub() {
     const menuData = {
       version: 1,
       lastUpdated: new Date().toISOString(),
-      items: state.allItems.map(({ imageData, ...rest }) => rest), // strip base64
+      bannerImage: state.bannerImage || null,
+      items: state.allItems.map(({ imageData, ...rest }) => rest), // strip dish base64
     };
     const result = await githubPutFile('menu.json', menuData, sha, 'update menu');
     if (result && result.content) {
@@ -326,10 +329,10 @@ function loadFromStorage() {
     state.dishImages = raw ? JSON.parse(raw) : {};
   } catch { state.dishImages = {}; }
 
-  // Banner
+  // Banner (local first; will be overwritten by remote if newer)
   try {
     const banner = localStorage.getItem(CONFIG.storage.bannerImage);
-    if (banner) applyBannerImage(banner);
+    if (banner) { state.bannerImage = banner; applyBannerImage(banner); }
   } catch {}
 
 }
@@ -904,9 +907,11 @@ function handleBannerSelect(file) {
   if (!file || !file.type.startsWith('image/')) return;
   const reader = new FileReader();
   reader.onload = evt => {
-    localStorage.setItem(CONFIG.storage.bannerImage, evt.target.result);
-    applyBannerImage(evt.target.result);
-    showToast('封面已更新 ✓', 'success');
+    const b64 = evt.target.result;
+    state.bannerImage = b64;
+    localStorage.setItem(CONFIG.storage.bannerImage, b64);
+    applyBannerImage(b64);
+    showToast('封面已更新，记得发布同步到另一台手机', 'info');
   };
   reader.readAsDataURL(file);
 }
@@ -1336,18 +1341,24 @@ function registerServiceWorker() {
    REMOTE DATA LOADING
    ============================================================ */
 async function loadRemoteData() {
-  // Menu
-  const remoteItems = await fetchMenuFromGitHub();
-  if (remoteItems && remoteItems.length > 0) {
+  // Menu + banner
+  const remoteMenu = await fetchMenuFromGitHub();
+  if (remoteMenu && remoteMenu.items.length > 0) {
     // Keep local custom items not yet on GitHub
-    const remoteIds     = new Set(remoteItems.map(i => i.id));
+    const remoteIds      = new Set(remoteMenu.items.map(i => i.id));
     const localOnlyCustom = state.allItems.filter(i => i.isCustom && !remoteIds.has(i.id));
-    state.allItems = [...remoteItems, ...localOnlyCustom];
+    state.allItems = [...remoteMenu.items, ...localOnlyCustom];
     // Re-validate cart
     state.cart = state.cart.filter(c => state.allItems.some(m => m.id === c.item.id));
     saveCart();
     renderMenu();
     renderCart();
+  }
+  // Banner image from remote (overrides local)
+  if (remoteMenu && remoteMenu.bannerImage) {
+    state.bannerImage = remoteMenu.bannerImage;
+    localStorage.setItem(CONFIG.storage.bannerImage, remoteMenu.bannerImage);
+    applyBannerImage(remoteMenu.bannerImage);
   }
   // Lists
   const remoteLists = await fetchListsFromGitHub();
