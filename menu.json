@@ -1,25 +1,189 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-26T00:00:00Z",
+  "lastUpdated": "2026-05-26T06:28:24.910Z",
   "items": [
-    { "id": "m01", "name": "土豆烧鸡块", "desc": "家常版，软糯入味",     "category": "dish",   "from": "#E8975A", "to": "#C4621D", "sales": 38 },
-    { "id": "m02", "name": "番茄炒鸡蛋", "desc": "经典家常，酸甜开胃",   "category": "dish",   "from": "#FF6B6B", "to": "#EE9B00", "sales": 52 },
-    { "id": "m03", "name": "宫保鸡丁",   "desc": "麻辣鲜香，下饭神器",   "category": "dish",   "from": "#E63946", "to": "#F4A261", "sales": 45 },
-    { "id": "m04", "name": "鱼香肉丝",   "desc": "四川家常，浓郁下饭",   "category": "dish",   "from": "#9B59B6", "to": "#E63946", "sales": 29 },
-    { "id": "m05", "name": "红烧肉",     "desc": "肥而不腻，软糯鲜香",   "category": "dish",   "from": "#7B2D00", "to": "#C1440E", "sales": 61 },
-    { "id": "m06", "name": "清炒时蔬",   "desc": "新鲜爽口，健康美味",   "category": "dish",   "from": "#52B788", "to": "#1B4332", "sales": 24 },
-    { "id": "s01", "name": "番茄鸡蛋汤", "desc": "鲜美营养，暖胃首选",   "category": "soup",   "from": "#FF6B6B", "to": "#FFB347", "sales": 33 },
-    { "id": "s02", "name": "紫菜蛋花汤", "desc": "清淡鲜美，营养丰富",   "category": "soup",   "from": "#7209B7", "to": "#F72585", "sales": 18 },
-    { "id": "s03", "name": "冬瓜排骨汤", "desc": "清甜解腻，滋补养生",   "category": "soup",   "from": "#4CC9F0", "to": "#4361EE", "sales": 22 },
-    { "id": "r01", "name": "扬州炒饭",   "desc": "粒粒分明，色香味俱全", "category": "staple", "from": "#F9C74F", "to": "#F8961E", "sales": 47 },
-    { "id": "r02", "name": "葱油拌面",   "desc": "简单美味，面条劲道",   "category": "staple", "from": "#A7795F", "to": "#6B4226", "sales": 35 },
-    { "id": "r03", "name": "番茄鸡蛋面", "desc": "酸甜开胃，暖心暖胃",   "category": "staple", "from": "#FF6B6B", "to": "#F9C74F", "sales": 41 },
-    { "id": "x01", "name": "锅贴",       "desc": "外酥里嫩，汁水丰盈",   "category": "snack",  "from": "#C19A6B", "to": "#8B5E3C", "sales": 56 },
-    { "id": "x02", "name": "春卷",       "desc": "金黄酥脆，馅料丰富",   "category": "snack",  "from": "#95D5B2", "to": "#52B788", "sales": 31 },
-    { "id": "x03", "name": "香酥芝麻饼", "desc": "香脆可口，芝麻飘香",   "category": "snack",  "from": "#DDA15E", "to": "#BC6C25", "sales": 27 },
-    { "id": "b01", "name": "红豆吐司",   "desc": "松软香甜，红豆馅料",   "category": "baking", "from": "#E63946", "to": "#FFB347", "sales": 19 },
-    { "id": "b02", "name": "蛋黄酥",     "desc": "层层酥皮，蛋黄流心",   "category": "baking", "from": "#F9C74F", "to": "#F3722C", "sales": 43 },
-    { "id": "c01", "name": "自制辣椒酱", "desc": "香辣开胃，配啥都好",   "category": "sauce",  "from": "#E63946", "to": "#9D0208", "sales": 15 },
-    { "id": "c02", "name": "葱油酱",     "desc": "鲜香浓郁，拌面一绝",   "category": "sauce",  "from": "#52B788", "to": "#2D6A4F", "sales": 12 }
+    {
+      "id": "m01",
+      "name": "土豆烧鸡块",
+      "desc": "家常版，软糯入味",
+      "category": "dish",
+      "from": "#E8975A",
+      "to": "#C4621D",
+      "sales": 38
+    },
+    {
+      "id": "m02",
+      "name": "番茄炒鸡蛋",
+      "desc": "经典家常，酸甜开胃",
+      "category": "dish",
+      "from": "#FF6B6B",
+      "to": "#EE9B00",
+      "sales": 52
+    },
+    {
+      "id": "m03",
+      "name": "宫保鸡丁",
+      "desc": "麻辣鲜香，下饭神器",
+      "category": "dish",
+      "from": "#E63946",
+      "to": "#F4A261",
+      "sales": 45
+    },
+    {
+      "id": "m04",
+      "name": "鱼香肉丝",
+      "desc": "四川家常，浓郁下饭",
+      "category": "dish",
+      "from": "#9B59B6",
+      "to": "#E63946",
+      "sales": 29
+    },
+    {
+      "id": "m05",
+      "name": "红烧肉",
+      "desc": "肥而不腻，软糯鲜香",
+      "category": "dish",
+      "from": "#7B2D00",
+      "to": "#C1440E",
+      "sales": 61
+    },
+    {
+      "id": "m06",
+      "name": "清炒时蔬",
+      "desc": "新鲜爽口，健康美味",
+      "category": "dish",
+      "from": "#52B788",
+      "to": "#1B4332",
+      "sales": 24
+    },
+    {
+      "id": "s01",
+      "name": "番茄鸡蛋汤",
+      "desc": "鲜美营养，暖胃首选",
+      "category": "soup",
+      "from": "#FF6B6B",
+      "to": "#FFB347",
+      "sales": 33
+    },
+    {
+      "id": "s02",
+      "name": "紫菜蛋花汤",
+      "desc": "清淡鲜美，营养丰富",
+      "category": "soup",
+      "from": "#7209B7",
+      "to": "#F72585",
+      "sales": 18
+    },
+    {
+      "id": "s03",
+      "name": "冬瓜排骨汤",
+      "desc": "清甜解腻，滋补养生",
+      "category": "soup",
+      "from": "#4CC9F0",
+      "to": "#4361EE",
+      "sales": 22
+    },
+    {
+      "id": "r01",
+      "name": "扬州炒饭",
+      "desc": "粒粒分明，色香味俱全",
+      "category": "staple",
+      "from": "#F9C74F",
+      "to": "#F8961E",
+      "sales": 47
+    },
+    {
+      "id": "r02",
+      "name": "葱油拌面",
+      "desc": "简单美味，面条劲道",
+      "category": "staple",
+      "from": "#A7795F",
+      "to": "#6B4226",
+      "sales": 35
+    },
+    {
+      "id": "r03",
+      "name": "番茄鸡蛋面",
+      "desc": "酸甜开胃，暖心暖胃",
+      "category": "staple",
+      "from": "#FF6B6B",
+      "to": "#F9C74F",
+      "sales": 41
+    },
+    {
+      "id": "x01",
+      "name": "锅贴",
+      "desc": "外酥里嫩，汁水丰盈",
+      "category": "snack",
+      "from": "#C19A6B",
+      "to": "#8B5E3C",
+      "sales": 56
+    },
+    {
+      "id": "x02",
+      "name": "春卷",
+      "desc": "金黄酥脆，馅料丰富",
+      "category": "snack",
+      "from": "#95D5B2",
+      "to": "#52B788",
+      "sales": 31
+    },
+    {
+      "id": "x03",
+      "name": "香酥芝麻饼",
+      "desc": "香脆可口，芝麻飘香",
+      "category": "snack",
+      "from": "#DDA15E",
+      "to": "#BC6C25",
+      "sales": 27
+    },
+    {
+      "id": "b01",
+      "name": "红豆吐司",
+      "desc": "松软香甜，红豆馅料",
+      "category": "baking",
+      "from": "#E63946",
+      "to": "#FFB347",
+      "sales": 19
+    },
+    {
+      "id": "b02",
+      "name": "蛋黄酥",
+      "desc": "层层酥皮，蛋黄流心",
+      "category": "baking",
+      "from": "#F9C74F",
+      "to": "#F3722C",
+      "sales": 43
+    },
+    {
+      "id": "c01",
+      "name": "自制辣椒酱",
+      "desc": "香辣开胃，配啥都好",
+      "category": "sauce",
+      "from": "#E63946",
+      "to": "#9D0208",
+      "sales": 15
+    },
+    {
+      "id": "c02",
+      "name": "葱油酱",
+      "desc": "鲜香浓郁，拌面一绝",
+      "category": "sauce",
+      "from": "#52B788",
+      "to": "#2D6A4F",
+      "sales": 12
+    },
+    {
+      "id": "custom-mpm97s23lwwt",
+      "name": "米饭",
+      "desc": "",
+      "emoji": "🍽️",
+      "from": "#6C5CE7",
+      "to": "#A29BFE",
+      "category": "staple",
+      "sales": 0,
+      "imageUrl": null,
+      "isCustom": true
+    }
   ]
 }
