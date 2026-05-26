@@ -315,6 +315,24 @@ function getDisplayImage(item) {
   return state.dishImages[item.id] || item.imageUrl || item.imageData || null;
 }
 
+// 将 base64 data URL 转成 Blob URL，解决华为浏览器对超长 data: URL 的限制
+// 对普通 http/https URL 或 null 直接透传
+const _blobCache = new Map();
+function toBlobUrl(src) {
+  if (!src || !src.startsWith('data:')) return src;
+  if (_blobCache.has(src)) return _blobCache.get(src);
+  try {
+    const [header, data] = src.split(',');
+    const mime  = header.match(/:(.*?);/)[1];
+    const bytes = atob(data);
+    const arr   = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([arr], { type: mime }));
+    _blobCache.set(src, url);
+    return url;
+  } catch (e) { return src; }
+}
+
 function getItemImageUrl(item) {
   return state.dishImageUrls[item.id] || item.imageUrl || null;
 }
@@ -501,7 +519,18 @@ function renderSidebar() {
     el.innerHTML = `<span class="cat-emoji">${cat.emoji}</span>${cat.name}`;
     el.addEventListener('click', () => {
       const section = $(`section-${cat.id}`);
-      if (section) { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); setActiveCat(cat.id); }
+      if (!section) return;
+      setActiveCat(cat.id);
+      // scrollIntoView 在华为浏览器滚动的是 window 而非容器，改用 scrollTop 直接操作
+      const container = $('dishMain');
+      const containerRect = container.getBoundingClientRect();
+      const sectionRect   = section.getBoundingClientRect();
+      const target = sectionRect.top - containerRect.top + container.scrollTop;
+      try {
+        container.scrollTo({ top: target, behavior: 'smooth' });
+      } catch (e) {
+        container.scrollTop = target; // 降级兼容
+      }
     });
     sidebar.appendChild(el);
   });
@@ -653,7 +682,7 @@ function initDishSortable() {
 function createDishCard(item) {
   const entry    = state.cart.find(c => c.item.id === item.id);
   const qty      = entry ? entry.quantity : 0;
-  const imgSrc   = getDisplayImage(item);
+  const imgSrc   = toBlobUrl(getDisplayImage(item));
   const card     = document.createElement('div');
   card.className = 'dish-card pop-anim';
   card.dataset.id = item.id;
@@ -778,7 +807,7 @@ function renderCart() {
 
 function buildCartItemHTML(entry) {
   const { id, item, quantity, notes } = entry;
-  const imgSrc = getDisplayImage(item);
+  const imgSrc = toBlobUrl(getDisplayImage(item));
   const thumbStyle = imgSrc
     ? `background-image:url('${imgSrc}');background-size:cover;background-position:center`
     : `background:linear-gradient(135deg,${item.from || '#FF6B35'},${item.to || '#FDCB6E'})`;
@@ -901,7 +930,8 @@ function deleteItem(itemId) {
    ============================================================ */
 function applyBannerImage(base64) {
   const b = $('headerBanner');
-  b.style.backgroundImage    = `url('${base64}')`;
+  const url = toBlobUrl(base64) || base64;
+  b.style.backgroundImage    = `url('${url}')`;
   b.style.backgroundSize     = 'cover';
   b.style.backgroundPosition = 'center';
 }
