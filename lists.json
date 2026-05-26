@@ -1,6 +1,12 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-26T00:00:00Z",
-  "shoppingList": [],
+  "lastUpdated": "2026-05-26T06:27:52.459Z",
+  "shoppingList": [
+    {
+      "id": "mpm972vpbzcu",
+      "name": "蘑菇",
+      "addedAt": "2026-05-26T06:27:51.254Z"
+    }
+  ],
   "fridgeInventory": []
 }
