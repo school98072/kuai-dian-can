@@ -538,6 +538,104 @@ function renderMenu() {
   if (!state.activeCategory && firstCat) state.activeCategory = firstCat;
   renderSidebar();
   initCategoryObserver();
+  if (state.adminMode) initDishSortable();
+}
+
+/* ============================================================
+   WITHIN-CATEGORY DRAG SORT (admin mode)
+   ============================================================ */
+function syncCatOrder(section, catId) {
+  const newIds = [...section.querySelectorAll('.dish-card')].map(c => c.dataset.id);
+  const result = [];
+  CATEGORIES.forEach(cat => {
+    const catItems = state.allItems.filter(i =>
+      (i.category || (i.isCustom ? 'custom' : 'dish')) === cat.id
+    );
+    if (cat.id === catId) {
+      newIds.forEach(id => {
+        const item = catItems.find(i => i.id === id);
+        if (item) result.push(item);
+      });
+    } else {
+      result.push(...catItems);
+    }
+  });
+  state.allItems = result;
+  showToast('顺序已调整，记得发布菜单', 'info');
+}
+
+function initDishSortable() {
+  document.querySelectorAll('.dish-section').forEach(section => {
+    const catId = section.id.replace('section-', '');
+    let dragCard = null;
+
+    section.querySelectorAll('.dish-card').forEach(card => {
+      const handle = card.querySelector('.drag-handle');
+      if (!handle) return;
+
+      // ── Mouse / Desktop DnD ──────────────────────────────
+      card.draggable = true;
+      card.addEventListener('dragstart', e => {
+        dragCard = card;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+      card.addEventListener('dragend', () => {
+        if (dragCard) { dragCard.classList.remove('dragging'); dragCard = null; }
+        section.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(c => {
+          c.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+        syncCatOrder(section, catId);
+      });
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (!dragCard || dragCard === card) return;
+        section.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(c => {
+          c.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+        const rect = card.getBoundingClientRect();
+        if (e.clientY < rect.top + rect.height / 2) {
+          card.classList.add('drag-over-top');
+          section.insertBefore(dragCard, card);
+        } else {
+          card.classList.add('drag-over-bottom');
+          card.after(dragCard);
+        }
+      });
+
+      // ── Touch / Mobile ───────────────────────────────────
+      handle.addEventListener('touchstart', e => {
+        e.preventDefault();
+        dragCard = card;
+        card.classList.add('dragging');
+        card.style.pointerEvents = 'none'; // let elementFromPoint see through
+      }, { passive: false });
+
+      handle.addEventListener('touchmove', e => {
+        if (!dragCard) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        const under = document.elementFromPoint(t.clientX, t.clientY);
+        const targetCard = under && under.closest('.dish-card');
+        if (targetCard && targetCard !== dragCard && section.contains(targetCard)) {
+          const rect = targetCard.getBoundingClientRect();
+          if (t.clientY < rect.top + rect.height / 2) {
+            section.insertBefore(dragCard, targetCard);
+          } else {
+            targetCard.after(dragCard);
+          }
+        }
+      }, { passive: false });
+
+      handle.addEventListener('touchend', () => {
+        if (!dragCard) return;
+        dragCard.classList.remove('dragging');
+        dragCard.style.pointerEvents = '';
+        syncCatOrder(section, catId);
+        dragCard = null;
+      });
+    });
+  });
 }
 
 function createDishCard(item) {
@@ -559,10 +657,11 @@ function createDishCard(item) {
         <input type="file" accept="image/*" class="dish-img-input" data-id="${item.id}" style="display:none">
       </label>` : '';
 
-  const deleteBtn = state.adminMode && item.isCustom
+  const deleteBtn = state.adminMode
     ? `<button class="dish-delete-btn" data-id="${item.id}" aria-label="删除">✕</button>` : '';
 
   card.innerHTML = `
+    <div class="drag-handle" title="拖动排序">⠿</div>
     <div class="dish-thumb" style="${thumbStyle}">
       ${!imgSrc ? `<span class="dish-thumb-emoji">${item.emoji || '🍽️'}</span>` : ''}
       ${editOverlay}
@@ -570,7 +669,6 @@ function createDishCard(item) {
     <div class="dish-info">
       <div class="dish-name-row">
         <span class="dish-name">${escHtml(item.name)}</span>
-        ${item.isCustom ? '<span class="dish-custom-tag">自定义</span>' : ''}
       </div>
       ${item.desc ? `<p class="dish-desc">${escHtml(item.desc)}</p>` : ''}
       <div class="dish-footer">
@@ -620,11 +718,11 @@ function createDishCard(item) {
     e.target.value = '';
   });
 
-  // Admin: delete custom
+  // Admin: delete any item
   const delBtn = card.querySelector('.dish-delete-btn');
   if (delBtn) delBtn.addEventListener('click', e => {
     e.stopPropagation();
-    deleteCustomItem(item.id);
+    deleteItem(item.id);
   });
 
   return card;
@@ -781,7 +879,7 @@ function toggleAdminMode() {
 /* ============================================================
    CUSTOM ITEM DELETION
    ============================================================ */
-function deleteCustomItem(itemId) {
+function deleteItem(itemId) {
   state.cart = state.cart.filter(c => c.item.id !== itemId);
   state.allItems = state.allItems.filter(i => i.id !== itemId);
   delete state.dishImages[itemId];

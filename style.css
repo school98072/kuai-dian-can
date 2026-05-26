@@ -487,10 +487,43 @@ img { display: block; max-width: 100%; }
   justify-content: center;
 }
 
+/* Drag handle (admin mode) */
+.drag-handle {
+  display: none;
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 26px;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 17px;
+  letter-spacing: -2px;
+  cursor: grab;
+  touch-action: none;
+  z-index: 2;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.drag-handle:active { cursor: grabbing; }
+
 /* Admin mode visual */
 .app.admin-mode .dish-card {
   outline: 1.5px dashed var(--primary);
   outline-offset: -1px;
+  padding-left: 30px; /* room for drag handle */
+}
+.app.admin-mode .drag-handle {
+  display: flex;
+}
+.dish-card.dragging {
+  opacity: 0.45;
+  outline-style: solid !important;
+}
+.dish-card.drag-over-top {
+  box-shadow: 0 -2px 0 var(--primary);
+}
+.dish-card.drag-over-bottom {
+  box-shadow: 0 2px 0 var(--primary);
 }
 .app.admin-mode .shop-action-btn#adminToggleBtn {
   background: var(--primary-light);
