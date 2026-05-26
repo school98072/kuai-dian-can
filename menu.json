@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-26T09:00:41.252Z",
+  "lastUpdated": "2026-05-26T13:21:04.161Z",
   "items": [
     {
       "id": "m02",
@@ -45,7 +45,8 @@
       "category": "dish",
       "from": "#7B2D00",
       "to": "#C1440E",
-      "sales": 0
+      "sales": 0,
+      "imageUrl": "https://i.ibb.co/B5zPRNm9/dish.jpg"
     },
     {
       "id": "m06",
@@ -186,6 +187,18 @@
       "category": "baking",
       "sales": 0,
       "imageUrl": "https://i.ibb.co/G4FY64WM/dish.jpg",
+      "isCustom": true
+    },
+    {
+      "id": "custom-mpmnyg71birg",
+      "name": "乾隆白菜",
+      "desc": "",
+      "emoji": "🍽️",
+      "from": "#E84393",
+      "to": "#E17055",
+      "category": "dish",
+      "sales": 0,
+      "imageUrl": "https://i.ibb.co/S7XzKdV7/dish.jpg",
       "isCustom": true
     }
   ]
