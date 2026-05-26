@@ -127,8 +127,10 @@ async function uploadToImgbb(base64Data) {
    ============================================================ */
 async function githubGetFile(path) {
   try {
-    const url = `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${path}?ref=${GITHUB.branch}`;
+    // Always fetch fresh SHA — never use browser-cached API response
+    const url = `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${path}?ref=${GITHUB.branch}&_=${Date.now()}`;
     const r = await fetch(url, {
+      cache: 'no-store',
       headers: { Authorization: `token ${GITHUB._t()}`, Accept: 'application/vnd.github.v3+json' },
     });
     if (!r.ok) return null;
