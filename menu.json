@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-26T13:33:20.116Z",
+  "lastUpdated": "2026-05-26T15:15:58.746Z",
   "items": [
     {
       "id": "m02",
@@ -187,6 +187,18 @@
       "category": "dish",
       "sales": 0,
       "imageUrl": "https://i.ibb.co/S7XzKdV7/dish.jpg",
+      "isCustom": true
+    },
+    {
+      "id": "custom-mpms27f3g9zg",
+      "name": "奶油培根意面",
+      "desc": "",
+      "emoji": "🍽️",
+      "from": "#E84393",
+      "to": "#E17055",
+      "category": "staple",
+      "sales": 0,
+      "imageUrl": "https://i.ibb.co/1353PVc/dish.jpg",
       "isCustom": true
     }
   ]
