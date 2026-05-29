@@ -1,13 +1,7 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-29T17:58:31.559Z",
-  "shoppingList": [
-    {
-      "id": "mpmfcof1xxzv",
-      "name": "洋葱",
-      "addedAt": "2026-05-26T09:20:10.141Z"
-    }
-  ],
+  "lastUpdated": "2026-05-29T17:59:11.199Z",
+  "shoppingList": [],
   "fridgeInventory": [
     {
       "id": "mpp0mqicyoea",
@@ -78,6 +72,11 @@
       "id": "mpr86t2o4gq1",
       "name": "杏鲍菇",
       "addedAt": "2026-05-29T17:58:29.808Z"
+    },
+    {
+      "id": "mpmfcof1xxzv",
+      "name": "洋葱",
+      "addedAt": "2026-05-26T09:20:10.141Z"
     }
   ]
 }
