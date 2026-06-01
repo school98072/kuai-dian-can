@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-01T13:39:02.125Z",
+  "lastUpdated": "2026-06-01T13:39:08.459Z",
   "shoppingList": [],
   "fridgeInventory": [
     {
@@ -42,11 +42,6 @@
       "id": "mpr85zk5w7e8",
       "name": "罗马生菜",
       "addedAt": "2026-05-29T17:57:51.558Z"
-    },
-    {
-      "id": "mpr86gg27eht",
-      "name": "迷你娃娃菜",
-      "addedAt": "2026-05-29T17:58:13.442Z"
     },
     {
       "id": "mpr86t2o4gq1",
