@@ -162,9 +162,23 @@ async function githubPutFile(path, jsonData, sha, message) {
 }
 
 async function fetchMenuFromGitHub() {
+  // 优先使用 GitHub Contents API（带认证、cache: no-store），彻底绕过
+  // raw.githubusercontent.com 的 CDN 缓存，保证每次打开 app 都拿到最新内容。
+  try {
+    const file = await githubGetFile('menu.json');
+    if (file && file.content) {
+      const data = JSON.parse(atob(file.content.replace(/\n/g, '')));
+      if (Array.isArray(data.items)) {
+        return { items: data.items, bannerImage: data.bannerImage || null };
+      }
+    }
+  } catch (e) {
+    console.warn('[GitHub] fetchMenu via API failed, falling back to raw URL:', e);
+  }
+  // 降级：public raw URL（令牌失效时仍可只读）
   try {
     const url = `https://raw.githubusercontent.com/${GITHUB.owner}/${GITHUB.repo}/${GITHUB.branch}/menu.json?t=${Date.now()}`;
-    const r = await fetch(url);
+    const r = await fetch(url, { cache: 'no-store' });
     if (!r.ok) throw new Error('network error');
     const data = await r.json();
     if (!Array.isArray(data.items)) return null;
@@ -192,14 +206,29 @@ async function pushMenuToGitHub() {
   try {
     const file = await githubGetFile('menu.json');
     const sha  = file ? file.sha : undefined;
+
+    // 方案 A：解码发布前的 GitHub 最新内容，把其 imageData 作为第三层保底。
+    // 防止跨设备/跨会话覆盖其他手机上传的图片：
+    //   优先级：① 本设备 localStorage（state.dishImages）
+    //           ② 本 session 启动时的 GitHub 快照（item.imageData）
+    //           ③ 本次发布时刚拉到的 GitHub 最新内容（remoteImages）
+    const remoteImages = {};
+    if (file && file.content) {
+      try {
+        const remoteData = JSON.parse(atob(file.content.replace(/\n/g, '')));
+        if (Array.isArray(remoteData.items)) {
+          remoteData.items.forEach(i => { if (i.imageData) remoteImages[i.id] = i.imageData; });
+        }
+      } catch {}
+    }
+
     const menuData = {
       version: 1,
       lastUpdated: new Date().toISOString(),
       bannerImage: state.bannerImage || null,
-      // Merge latest local base64 into each item before pushing
       items: state.allItems.map(item => ({
         ...item,
-        imageData: state.dishImages[item.id] || item.imageData || null,
+        imageData: state.dishImages[item.id] || item.imageData || remoteImages[item.id] || null,
       })),
     };
     const result = await githubPutFile('menu.json', menuData, sha, 'update menu');
