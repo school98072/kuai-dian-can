@@ -51,8 +51,8 @@ img { display: block; max-width: 100%; }
 .app {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
-  height: 100vh;
+  height: 100vh;  /* 旧版浏览器回退（华为兼容） */
+  height: 100dvh; /* 新浏览器：动态视口，避免地址栏遮挡 */
   overflow: hidden;
   position: relative;
 }
@@ -80,7 +80,7 @@ img { display: block; max-width: 100%; }
 
 .header-banner::after {
   content: '';
-  position: absolute; inset: 0;
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0; /* inset 简写华为旧版不支持 */
   background: linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.15) 100%);
 }
 
@@ -366,7 +366,7 @@ img { display: block; max-width: 100%; }
 
 /* Admin edit overlay on thumbnail */
 .thumb-edit-overlay {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(0,0,0,0.45);
   display: flex;
   flex-direction: column;
@@ -583,7 +583,7 @@ img { display: block; max-width: 100%; }
    OVERLAY
    ============================================================ */
 .overlay {
-  position: fixed; inset: 0; z-index: 100;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 100;
   background: rgba(0,0,0,0.5);
   opacity: 0; pointer-events: none;
   transition: opacity 0.25s;
@@ -1063,7 +1063,7 @@ img { display: block; max-width: 100%; }
 .modal-crop {
   display: none;
   position: fixed;
-  inset: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   z-index: 1000;
   background: #111;
   flex-direction: column;

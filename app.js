@@ -169,7 +169,7 @@ async function fetchMenuFromGitHub() {
     if (file && file.content) {
       const data = JSON.parse(atob(file.content.replace(/\n/g, '')));
       if (Array.isArray(data.items)) {
-        return { items: data.items, bannerImage: data.bannerImage || null };
+        return { items: data.items, bannerImage: data.bannerImage || null, lastUpdated: data.lastUpdated || null };
       }
     }
   } catch (e) {
@@ -182,7 +182,7 @@ async function fetchMenuFromGitHub() {
     if (!r.ok) throw new Error('network error');
     const data = await r.json();
     if (!Array.isArray(data.items)) return null;
-    return { items: data.items, bannerImage: data.bannerImage || null };
+    return { items: data.items, bannerImage: data.bannerImage || null, lastUpdated: data.lastUpdated || null };
   } catch (e) {
     console.warn('[GitHub] fetchMenu failed:', e);
     return null;
@@ -192,7 +192,7 @@ async function fetchMenuFromGitHub() {
 async function fetchListsFromGitHub() {
   try {
     const url = `https://raw.githubusercontent.com/${GITHUB.owner}/${GITHUB.repo}/${GITHUB.branch}/lists.json?t=${Date.now()}`;
-    const r = await fetch(url);
+    const r = await fetch(url, { cache: 'no-store' });
     if (!r.ok) throw new Error('network error');
     return r.json();
   } catch (e) {
@@ -233,6 +233,7 @@ async function pushMenuToGitHub() {
     };
     const result = await githubPutFile('menu.json', menuData, sha, 'update menu');
     if (result && result.content) {
+      remoteStamps.menu = menuData.lastUpdated;
       showToast('菜单已发布 ✓', 'success');
       return true;
     }
@@ -255,7 +256,8 @@ async function pushListsToGitHub() {
       fridgeInventory: state.lists.fridgeInventory,
     };
     const result = await githubPutFile('lists.json', listsData, sha, 'update lists');
-    return !!(result && result.content);
+    if (result && result.content) { remoteStamps.lists = listsData.lastUpdated; return true; }
+    return false;
   } catch (e) {
     console.error('[GitHub] pushLists failed:', e);
     showToast('清单同步失败', 'error');
@@ -266,10 +268,10 @@ async function pushListsToGitHub() {
 async function fetchOrdersFromGitHub() {
   try {
     const url = `https://raw.githubusercontent.com/${GITHUB.owner}/${GITHUB.repo}/${GITHUB.branch}/orders.json?t=${Date.now()}`;
-    const r = await fetch(url);
+    const r = await fetch(url, { cache: 'no-store' });
     if (!r.ok) throw new Error('network error');
     const data = await r.json();
-    return Array.isArray(data.orders) ? data.orders : null;
+    return Array.isArray(data.orders) ? { orders: data.orders, lastUpdated: data.lastUpdated || null } : null;
   } catch (e) {
     console.warn('[GitHub] fetchOrders failed:', e);
     return null;
@@ -278,21 +280,27 @@ async function fetchOrdersFromGitHub() {
 
 async function pushOrderToGitHub(newOrder) {
   try {
-    // Fetch latest orders from GitHub first (handles concurrent orders from 2 phones)
-    const remoteData = await fetchOrdersFromGitHub();
-    const merged = remoteData ? remoteData : state.orders.slice();
-    // Prepend new order (newest first)
-    merged.unshift(newOrder);
-    // Get SHA for PUT
+    // 一次 API 请求同时拿到最新内容 + SHA（原本要请求两次）
+    // 仍可处理两台手机并发下单的合并
     const file = await githubGetFile('orders.json');
-    const sha  = file ? file.sha : undefined;
+    let remoteOrders = null;
+    if (file && file.content) {
+      try {
+        const d = JSON.parse(atob(file.content.replace(/\n/g, '')));
+        if (Array.isArray(d.orders)) remoteOrders = d.orders;
+      } catch {}
+    }
+    const merged = remoteOrders ? remoteOrders.slice() : state.orders.slice();
+    // Prepend new order (newest first)；去重防止离线降级时重复写入
+    if (!merged.some(o => o.id === newOrder.id)) merged.unshift(newOrder);
     const ordersData = {
       version: 1,
       lastUpdated: new Date().toISOString(),
       orders: merged,
     };
-    const result = await githubPutFile('orders.json', ordersData, sha, 'add order');
+    const result = await githubPutFile('orders.json', ordersData, file ? file.sha : undefined, 'add order');
     if (result && result.content) {
+      remoteStamps.orders = ordersData.lastUpdated; // 轮询时不再重复处理
       state.orders = merged;
       renderMenu(); // refresh 月销 counts
       if (state.activePage === 'profile') renderProfilePage();
@@ -306,18 +314,22 @@ async function pushOrderToGitHub(newOrder) {
   }
 }
 
-// 月销 — total units of itemId ordered in the current calendar month
-function getItemSales(itemId) {
+// 月销 — 一次遍历订单建立 {itemId: 数量} 映射，避免每张菜卡都全量扫描订单
+function buildSalesMap() {
   const now = new Date();
   const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  let total = 0;
+  const map = Object.create(null);
   state.orders.forEach(o => {
     if (!o.timestamp || !o.timestamp.startsWith(yearMonth)) return;
     (o.items || []).forEach(it => {
-      if (it.id === itemId) total += (it.quantity || 1);
+      map[it.id] = (map[it.id] || 0) + (it.quantity || 1);
     });
   });
-  return total;
+  return map;
+}
+
+function getItemSales(itemId) {
+  return buildSalesMap()[itemId] || 0;
 }
 
 /* ============================================================
@@ -325,10 +337,10 @@ function getItemSales(itemId) {
    ============================================================ */
 const $ = id => document.getElementById(id);
 
+const _escMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 function escHtml(str) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(String(str)));
-  return d.innerHTML;
+  // 纯字符串替换，比每次创建 DOM 节点快得多（渲染热路径）
+  return String(str).replace(/[&<>"']/g, c => _escMap[c]);
 }
 
 function uid() {
@@ -580,6 +592,8 @@ function setActiveCat(catId) {
 function renderMenu() {
   const dishMain = $('dishMain');
   if (!dishMain) return;
+  const prevScroll = dishMain.scrollTop; // 后台刷新重渲染时保留滚动位置
+  const salesMap   = buildSalesMap();
   const query = state.searchQuery.trim().toLowerCase();
   const groups = {};
   CATEGORIES.forEach(cat => { groups[cat.id] = []; });
@@ -602,10 +616,11 @@ function renderMenu() {
     label.className = 'section-label';
     label.textContent = cat.name;
     section.appendChild(label);
-    items.forEach(item => section.appendChild(createDishCard(item)));
+    items.forEach(item => section.appendChild(createDishCard(item, salesMap)));
     dishMain.appendChild(section);
   });
   if (!state.activeCategory && firstCat) state.activeCategory = firstCat;
+  if (prevScroll > 0) dishMain.scrollTop = prevScroll;
   renderSidebar();
   initCategoryObserver();
   if (state.adminMode) initDishSortable();
@@ -708,9 +723,16 @@ function initDishSortable() {
   });
 }
 
-function createDishCard(item) {
+function buildQtyCtrlHTML(itemId, qty) {
+  return `${qty > 0 ? `<button class="qty-btn minus" data-id="${itemId}" aria-label="减少">−</button>
+                       <span class="qty-num" aria-live="polite">${qty}</span>` : ''}
+          <button class="qty-btn plus${qty === 0 ? ' solo' : ''}" data-id="${itemId}" aria-label="加入">+</button>`;
+}
+
+function createDishCard(item, salesMap) {
   const entry    = state.cart.find(c => c.item.id === item.id);
   const qty      = entry ? entry.quantity : 0;
+  const sales    = salesMap ? (salesMap[item.id] || 0) : getItemSales(item.id);
   const imgSrc   = toBlobUrl(getDisplayImage(item));
   const card     = document.createElement('div');
   card.className = 'dish-card pop-anim';
@@ -742,56 +764,58 @@ function createDishCard(item) {
       </div>
       ${item.desc ? `<p class="dish-desc">${escHtml(item.desc)}</p>` : ''}
       <div class="dish-footer">
-        <span class="dish-sales">月销 ${getItemSales(item.id)}</span>
+        <span class="dish-sales">月销 ${sales}</span>
         <div class="dish-qty-ctrl">
-          ${qty > 0 ? `<button class="qty-btn minus" data-id="${item.id}" aria-label="减少">−</button>
-                       <span class="qty-num" aria-live="polite">${qty}</span>` : ''}
-          <button class="qty-btn plus${qty === 0 ? ' solo' : ''}" data-id="${item.id}" aria-label="加入">+</button>
+          ${buildQtyCtrlHTML(item.id, qty)}
         </div>
       </div>
     </div>
     ${deleteBtn}
   `;
 
-  card.querySelector('.plus').addEventListener('click', e => {
-    e.stopPropagation();
+  // 事件统一由 initDishDelegation() 在 dishMain 上委托处理，
+  // 不再为每张卡片绑定监听器（渲染更快、内存占用更低）
+  return card;
+}
+
+// 菜卡事件委托 — 只绑定一次，重渲染后无需重新绑定
+function initDishDelegation() {
+  const dishMain = $('dishMain');
+
+  dishMain.addEventListener('click', e => {
+    const delBtn = e.target.closest('.dish-delete-btn');
+    if (delBtn) { e.stopPropagation(); deleteItem(delBtn.dataset.id); return; }
     if (state.adminMode) return;
-    handleAddDish(item);
-  });
-  const minusBtn = card.querySelector('.minus');
-  if (minusBtn) minusBtn.addEventListener('click', e => {
+    const qtyBtn = e.target.closest('.qty-btn');
+    if (!qtyBtn) return;
     e.stopPropagation();
-    if (state.adminMode) return;
-    handleRemoveDish(item);
+    const item = state.allItems.find(i => i.id === qtyBtn.dataset.id);
+    if (!item) return;
+    if (qtyBtn.classList.contains('plus')) handleAddDish(item);
+    else                                   handleRemoveDish(item);
   });
 
-  // Admin: image replace → crop modal
-  const imgInput = card.querySelector('.dish-img-input');
-  if (imgInput) imgInput.addEventListener('change', e => {
-    const file = e.target.files[0];
+  // Admin: image replace → crop modal（change 事件同样冒泡，可委托）
+  dishMain.addEventListener('change', e => {
+    const input = e.target;
+    if (!input.classList.contains('dish-img-input')) return;
+    const file = input.files[0];
+    const id   = input.dataset.id;
     if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => openCropModal(ev.target.result, cropped => {
-      state.dishImages[item.id] = cropped;
+      state.dishImages[id] = cropped;
       saveDishImages();
       // Store base64 directly in the item for GitHub sync (no imgbb needed)
-      const mi = state.allItems.find(i => i.id === item.id);
+      const mi = state.allItems.find(i => i.id === id);
       if (mi) mi.imageData = cropped;
-      refreshDish(item.id);
+      refreshDish(id);
+      if (state.adminMode) initDishSortable();
       showToast('图片已更新，记得发布菜单', 'info');
     });
     reader.readAsDataURL(file);
-    e.target.value = '';
+    input.value = '';
   });
-
-  // Admin: delete any item
-  const delBtn = card.querySelector('.dish-delete-btn');
-  if (delBtn) delBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    deleteItem(item.id);
-  });
-
-  return card;
 }
 
 function refreshDish(itemId) {
@@ -800,6 +824,16 @@ function refreshDish(itemId) {
   const item = state.allItems.find(i => i.id === itemId);
   if (!item) return;
   old.replaceWith(createDishCard(item));
+}
+
+// 轻量版：+/- 只更新数量控件，不重建整张卡片（图片不闪烁）
+function refreshDishQty(itemId) {
+  const card = document.querySelector(`.dish-card[data-id="${itemId}"]`);
+  if (!card) { return; }
+  const ctrl = card.querySelector('.dish-qty-ctrl');
+  if (!ctrl) return;
+  const entry = state.cart.find(c => c.item.id === itemId);
+  ctrl.innerHTML = buildQtyCtrlHTML(itemId, entry ? entry.quantity : 0);
 }
 
 /* ============================================================
@@ -883,7 +917,7 @@ function handleAddDish(item) {
   const existing = state.cart.find(c => c.item.id === item.id);
   if (existing) { existing.quantity++; }
   else          { state.cart.push({ id: uid(), item, quantity: 1, notes: '' }); }
-  saveCart(); refreshDish(item.id); renderCart();
+  saveCart(); refreshDishQty(item.id); renderCart();
   showToast(`${item.name} +1 ✓`, 'success');
 }
 
@@ -892,19 +926,19 @@ function handleRemoveDish(item) {
   if (!existing) return;
   existing.quantity--;
   if (existing.quantity <= 0) state.cart = state.cart.filter(c => c.item.id !== item.id);
-  saveCart(); refreshDish(item.id); renderCart();
+  saveCart(); refreshDishQty(item.id); renderCart();
 }
 
 function addToCart(item, notes) {
   state.cart.push({ id: uid(), item, quantity: 1, notes });
-  saveCart(); refreshDish(item.id); renderCart();
+  saveCart(); refreshDishQty(item.id); renderCart();
 }
 
 function removeFromCart(cartId) {
   const entry = state.cart.find(c => c.id === cartId);
   state.cart  = state.cart.filter(c => c.id !== cartId);
   saveCart();
-  if (entry) refreshDish(entry.item.id);
+  if (entry) refreshDishQty(entry.item.id);
   renderCart();
 }
 
@@ -913,13 +947,13 @@ function updateQuantity(cartId, delta) {
   if (!entry) return;
   entry.quantity = Math.max(0, entry.quantity + delta);
   if (entry.quantity === 0) { removeFromCart(cartId); return; }
-  saveCart(); renderCart(); refreshDish(entry.item.id);
+  saveCart(); renderCart(); refreshDishQty(entry.item.id);
 }
 
 function clearCart() {
   const ids = state.cart.map(c => c.item.id);
   state.cart = []; saveCart();
-  ids.forEach(id => refreshDish(id));
+  ids.forEach(id => refreshDishQty(id));
   renderCart();
 }
 
@@ -1133,7 +1167,8 @@ async function placeOrder() {
   const orderBody = `<p><strong>【订单时间】</strong>${e(timestamp)}</p><p><strong>【点餐内容】</strong></p>${htmlLines.join('')}<p>共 ${cartTotal()} 道菜</p>`.trim();
 
   try {
-    if (CONFIG.emailjs.enabled) {
+    // typeof 检查：CDN 被墙/加载失败时（华为浏览器常见）降级为 mailto
+    if (CONFIG.emailjs.enabled && typeof emailjs !== 'undefined') {
       emailjs.init({ publicKey: CONFIG.emailjs.publicKey });
       await emailjs.send(CONFIG.emailjs.serviceId, CONFIG.emailjs.templateId, {
         to_email: CONFIG.chefEmail, order_time: timestamp, order_content: orderBody,
@@ -1397,40 +1432,80 @@ function registerServiceWorker() {
 /* ============================================================
    REMOTE DATA LOADING
    ============================================================ */
+// 各远端文件的 lastUpdated 时间戳 — 没变就跳过重渲染（避免闪烁、保留滚动）
+const remoteStamps = { menu: null, lists: null, orders: null };
+let _refreshing = false;
+
 async function loadRemoteData() {
-  // Menu + banner
-  const remoteMenu = await fetchMenuFromGitHub();
-  if (remoteMenu && remoteMenu.items.length > 0) {
-    // Keep local custom items not yet on GitHub
-    const remoteIds      = new Set(remoteMenu.items.map(i => i.id));
-    const localOnlyCustom = state.allItems.filter(i => i.isCustom && !remoteIds.has(i.id));
-    state.allItems = [...remoteMenu.items, ...localOnlyCustom];
-    // Re-validate cart
-    state.cart = state.cart.filter(c => state.allItems.some(m => m.id === c.item.id));
-    saveCart();
-    renderMenu();
-    renderCart();
+  if (_refreshing) return; // 防止轮询与手动刷新并发
+  _refreshing = true;
+  try {
+    // 三个文件并行拉取（原本串行，等待时间 ≈ 三倍）
+    const [remoteMenu, remoteLists, remoteOrders] = await Promise.all([
+      fetchMenuFromGitHub(),
+      fetchListsFromGitHub(),
+      fetchOrdersFromGitHub(),
+    ]);
+
+    let menuChanged = false, ordersChanged = false;
+
+    // Menu + banner
+    if (remoteMenu && remoteMenu.items.length > 0 && remoteMenu.lastUpdated !== remoteStamps.menu) {
+      remoteStamps.menu = remoteMenu.lastUpdated;
+      // Keep local custom items not yet on GitHub
+      const remoteIds       = new Set(remoteMenu.items.map(i => i.id));
+      const localOnlyCustom = state.allItems.filter(i => i.isCustom && !remoteIds.has(i.id));
+      state.allItems = [...remoteMenu.items, ...localOnlyCustom];
+      // Re-validate cart
+      state.cart = state.cart.filter(c => state.allItems.some(m => m.id === c.item.id));
+      saveCart();
+      menuChanged = true;
+      // Banner image from remote (overrides local)
+      if (remoteMenu.bannerImage && remoteMenu.bannerImage !== state.bannerImage) {
+        state.bannerImage = remoteMenu.bannerImage;
+        localStorage.setItem(CONFIG.storage.bannerImage, remoteMenu.bannerImage);
+        applyBannerImage(remoteMenu.bannerImage);
+      }
+    }
+
+    // Lists
+    if (remoteLists && remoteLists.lastUpdated !== remoteStamps.lists) {
+      remoteStamps.lists = remoteLists.lastUpdated;
+      state.lists.shoppingList    = remoteLists.shoppingList    || [];
+      state.lists.fridgeInventory = remoteLists.fridgeInventory || [];
+      if (state.activePage === 'lists') renderListsPage();
+    }
+
+    // Orders (GitHub-synced history)
+    if (remoteOrders && remoteOrders.lastUpdated !== remoteStamps.orders) {
+      remoteStamps.orders = remoteOrders.lastUpdated;
+      state.orders = remoteOrders.orders;
+      ordersChanged = true;
+      if (state.activePage === 'profile') renderProfilePage();
+    }
+
+    // 只在数据真正变化时重渲染一次（菜单 + 月销共用 renderMenu）
+    if (menuChanged || ordersChanged) renderMenu();
+    if (menuChanged) renderCart();
+  } finally {
+    _refreshing = false;
   }
-  // Banner image from remote (overrides local)
-  if (remoteMenu && remoteMenu.bannerImage) {
-    state.bannerImage = remoteMenu.bannerImage;
-    localStorage.setItem(CONFIG.storage.bannerImage, remoteMenu.bannerImage);
-    applyBannerImage(remoteMenu.bannerImage);
-  }
-  // Lists
-  const remoteLists = await fetchListsFromGitHub();
-  if (remoteLists) {
-    state.lists.shoppingList   = remoteLists.shoppingList   || [];
-    state.lists.fridgeInventory= remoteLists.fridgeInventory|| [];
-    if (state.activePage === 'lists') renderListsPage();
-  }
-  // Orders (GitHub-synced history)
-  const remoteOrders = await fetchOrdersFromGitHub();
-  if (remoteOrders) {
-    state.orders = remoteOrders;
-    renderMenu(); // refresh 月销 with real data
-    if (state.activePage === 'profile') renderProfilePage();
-  }
+}
+
+/* ============================================================
+   AUTO REFRESH  (实时同步另一台手机的更新)
+   ============================================================ */
+function initAutoRefresh() {
+  const REFRESH_MS = 30000; // 前台时每 30 秒检查一次
+  setInterval(() => {
+    if (document.visibilityState === 'visible' && navigator.onLine !== false) loadRemoteData();
+  }, REFRESH_MS);
+  // App 切回前台立即同步
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') loadRemoteData();
+  });
+  // 网络恢复立即同步
+  window.addEventListener('online', () => loadRemoteData());
 }
 
 /* ============================================================
@@ -1516,6 +1591,7 @@ async function init() {
 
   // 2. Bind events
   bindEvents();
+  initDishDelegation();
   initCropEvents();
   initDrawerSwipe();
   initInstallPrompt();
@@ -1523,6 +1599,9 @@ async function init() {
 
   // 3. Fetch remote data (GitHub) — updates UI when ready
   loadRemoteData();
+
+  // 4. Keep data fresh while app is open / returns to foreground
+  initAutoRefresh();
 }
 
 document.addEventListener('DOMContentLoaded', init);

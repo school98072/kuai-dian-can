@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'v7';
+const CACHE_VERSION = 'v8';
 const CACHE_NAME = `pwa-ordersys-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   './',
@@ -47,17 +47,20 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Static assets: cache-first
+  // Static assets: stale-while-revalidate —
+  // 立刻回缓存（秒开），同时后台拉最新版写入缓存，下次打开即是新版
   if (request.url.includes(self.location.origin)) {
     event.respondWith(
-      caches.match(request)
-        .then(cached => cached || fetch(request).then(response => {
+      caches.match(request).then(cached => {
+        const network = fetch(request).then(response => {
           if (response && response.status === 200) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
           }
           return response;
-        }))
+        }).catch(() => cached); // 离线时仍回缓存
+        return cached || network;
+      })
     );
     return;
   }
