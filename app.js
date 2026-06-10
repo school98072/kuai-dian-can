@@ -128,6 +128,15 @@ async function uploadToImgbb(base64Data) {
 /* ============================================================
    GITHUB API
    ============================================================ */
+// GitHub API 返回的 base64 → UTF-8 字符串。
+// 不能直接 JSON.parse(atob(...))：atob 输出的是字节串，中文会变乱码
+function b64DecodeUtf8(b64) {
+  const bin = atob(b64.replace(/\n/g, ''));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 async function githubGetFile(path) {
   try {
     // Always fetch fresh SHA — never use browser-cached API response
@@ -167,7 +176,7 @@ async function fetchMenuFromGitHub() {
   try {
     const file = await githubGetFile('menu.json');
     if (file && file.content) {
-      const data = JSON.parse(atob(file.content.replace(/\n/g, '')));
+      const data = JSON.parse(b64DecodeUtf8(file.content));
       if (Array.isArray(data.items)) {
         return { items: data.items, bannerImage: data.bannerImage || null, lastUpdated: data.lastUpdated || null };
       }
@@ -215,7 +224,7 @@ async function pushMenuToGitHub() {
     const remoteImages = {};
     if (file && file.content) {
       try {
-        const remoteData = JSON.parse(atob(file.content.replace(/\n/g, '')));
+        const remoteData = JSON.parse(b64DecodeUtf8(file.content));
         if (Array.isArray(remoteData.items)) {
           remoteData.items.forEach(i => { if (i.imageData) remoteImages[i.id] = i.imageData; });
         }
@@ -286,7 +295,7 @@ async function pushOrderToGitHub(newOrder) {
     let remoteOrders = null;
     if (file && file.content) {
       try {
-        const d = JSON.parse(atob(file.content.replace(/\n/g, '')));
+        const d = JSON.parse(b64DecodeUtf8(file.content));
         if (Array.isArray(d.orders)) remoteOrders = d.orders;
       } catch {}
     }
